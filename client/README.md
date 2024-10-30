@@ -2,7 +2,7 @@
 Chess on Fleek is perfect for developers looking to deploy real-time, interactive applications. This template utilizes Next.js for a fullstck development experience, rendering, ensuring optimal performance with each move. Shoutout to [Rishabh Singh](https://github.com/rishabh1S) for kickstarting it and maintaining it.
 
 ## Prerequisites 
-- Node 18+
+- Node 18.18.0+
 - Fleek Account
 - [Fleek CLI](https://www.npmjs.com/package/@fleek-platform/cli)
 - [Fleek Next Adapter](https://www.npmjs.com/package/@fleek-platform/next)
