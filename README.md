@@ -16,6 +16,7 @@ git clone https://github.com/<your-id>/chess-on-fleek.git
 3. Enter the correct directory, install dependencies and run locally:
 ```bash
 cd chess-on-fleek
+cd client
 npm i
 npm run dev
 ```
