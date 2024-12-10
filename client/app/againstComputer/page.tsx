@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState, createElement } from "react";
 import { ChessboardBot, SideBoardComponent } from "@/components";
 import Image from "next/image";
 import * as FlagIcons from "country-flag-icons/react/3x2";
@@ -13,10 +13,12 @@ const AgainstComputer: React.FC = () => {
   const stockfishLevel = Number(searchParams.get("stockfishLevel"));
   const stockfishLevelSymbol =
     stockfishLevel === 2 ? "E" : stockfishLevel === 6 ? "M" : "H";
-  const { userName, profilePhoto } = useBoardStore((state) => ({
+  const { userName, profilePhoto, nationality } = useBoardStore((state) => ({
     userName: state.userName,
     profilePhoto: state.profilePhoto,
+    nationality: state.nationality
   }));
+
   const handleSendMessage = (message: string) => {
     if (message.trim() !== "") {
       const newMessage: Message = {
@@ -61,7 +63,10 @@ const AgainstComputer: React.FC = () => {
           <div className="flex items-start justify-center gap-1 font-semibold">
             {userName}
             <span>
-              <FlagIcons.IN className="w-4 h-4 mx-1 mt-1" />
+              {nationality && FlagIcons[nationality as keyof typeof FlagIcons] && 
+                createElement(FlagIcons[nationality as keyof typeof FlagIcons], {
+                  className: "w-4 h-4 mx-1 mt-1"
+                })}
             </span>
           </div>
         </div>

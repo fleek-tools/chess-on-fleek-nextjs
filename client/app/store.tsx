@@ -12,6 +12,7 @@ type BoardStore = {
   currentFEN: string;
   userName: string;
   profilePhoto: string;
+  nationality: string;
   gameOver: boolean;
   gameTimer: number;
   isTimerRunning: boolean;
@@ -23,6 +24,7 @@ type BoardStore = {
   setCurrentFEN: (fen: string) => void;
   setUserName: (name: string) => void;
   setProfilePhoto: (photo: string) => void;
+  setNationality: (country: string) => void;
   setGameOver: (gameOver: boolean) => void;
   startTimer: () => void;
   stopTimer: () => void;
@@ -40,10 +42,10 @@ export const useBoardStore = create<BoardStore>((set) => ({
   currentFEN: "",
   userName: "User",
   profilePhoto: "/images/def_user.jpeg",
+  nationality: "US", // Default nationality
   gameOver: false,
   gameTimer: 0,
   isTimerRunning: false,
-
   onNewGame: () => {},
   setTheme: (theme) => set({ theme }),
   setMoves: (moves) => set({ moves }),
@@ -52,8 +54,8 @@ export const useBoardStore = create<BoardStore>((set) => ({
   setCurrentFEN: (fen) => set({ currentFEN: fen }),
   setUserName: (name) => set({ userName: name }),
   setProfilePhoto: (photo) => set({ profilePhoto: photo }),
+  setNationality: (country) => set({ nationality: country }),
   setGameOver: (gameOver) => set({ gameOver }),
-
   startTimer: () => set({ isTimerRunning: true }),
   stopTimer: () => set({ isTimerRunning: false }),
   resetTimer: () => set({ gameTimer: 0, isTimerRunning: false }),
