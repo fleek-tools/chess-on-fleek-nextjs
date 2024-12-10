@@ -13,6 +13,8 @@ type BoardStore = {
   userName: string;
   profilePhoto: string;
   gameOver: boolean;
+  gameTimer: number;
+  isTimerRunning: boolean;
   onNewGame: () => void;
   setTheme: (theme: Theme) => void;
   setMoves: (moves: String[]) => void;
@@ -22,6 +24,10 @@ type BoardStore = {
   setUserName: (name: string) => void;
   setProfilePhoto: (photo: string) => void;
   setGameOver: (gameOver: boolean) => void;
+  startTimer: () => void;
+  stopTimer: () => void;
+  resetTimer: () => void;
+  incrementTimer: () => void;
 };
 
 export const useBoardStore = create<BoardStore>((set) => ({
@@ -35,6 +41,9 @@ export const useBoardStore = create<BoardStore>((set) => ({
   userName: "User",
   profilePhoto: "/images/def_user.jpeg",
   gameOver: false,
+  gameTimer: 0,
+  isTimerRunning: false,
+
   onNewGame: () => {},
   setTheme: (theme) => set({ theme }),
   setMoves: (moves) => set({ moves }),
@@ -44,4 +53,9 @@ export const useBoardStore = create<BoardStore>((set) => ({
   setUserName: (name) => set({ userName: name }),
   setProfilePhoto: (photo) => set({ profilePhoto: photo }),
   setGameOver: (gameOver) => set({ gameOver }),
+
+  startTimer: () => set({ isTimerRunning: true }),
+  stopTimer: () => set({ isTimerRunning: false }),
+  resetTimer: () => set({ gameTimer: 0, isTimerRunning: false }),
+  incrementTimer: () => set((state) => ({ gameTimer: state.gameTimer + 1 })),
 }));
