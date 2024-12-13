@@ -65,11 +65,29 @@ const ChessboardBot: React.FC = () => {
   const setMoves = useBoardStore((state) => state.setMoves);
   const setOnNewGame = useBoardStore((state) => state.setOnNewGame);
   const setGameOver = useBoardStore((state) => state.setGameOver);
+  const userName = useBoardStore((state) => state.userName);
+  
+  // timer state from store
+  const { 
+    gameTimer,
+    isTimerRunning,
+    startTimer,
+    stopTimer,
+    resetTimer,
+    incrementTimer 
+  } = useBoardStore(state => ({
+    gameTimer: state.gameTimer,
+    isTimerRunning: state.isTimerRunning,
+    startTimer: state.startTimer,
+    stopTimer: state.stopTimer,
+    resetTimer: state.resetTimer,
+    incrementTimer: state.incrementTimer
+  }));
+
   const [moveFrom, setMoveFrom] = useState<Square | null>(null);
   const [moveTo, setMoveTo] = useState<Square | null>(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
-  const [rightClickedSquares, setRightClickedSquares] =
-    useState<RightClickedSquares>({});
+  const [rightClickedSquares, setRightClickedSquares] = useState<RightClickedSquares>({});
   const moveSquares = {};
   const [optionSquares, setOptionSquares] = useState<OptionSquares>({});
   const searchParams = useSearchParams();
@@ -81,33 +99,72 @@ const ChessboardBot: React.FC = () => {
   ]);
   const [showGameModal, setShowGameModal] = useState(false);
   const [boardWidth, setBoardWidth] = useState(560);
+  const [hasGameStarted, setHasGameStarted] = useState(false);
+
+  // timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        incrementTimer();
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, incrementTimer]);
+
+  // handle first move and timer start
+  const handleFirstMove = useCallback(() => {
+    if (!hasGameStarted) {
+      setHasGameStarted(true);
+      resetTimer();
+      startTimer();
+    }
+  }, [hasGameStarted, resetTimer, startTimer]);
 
   useEffect(() => {
     if (playAs === "black") {
       makeStockfishMove();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playAs]);
 
   useEffect(() => {
     if (game.in_checkmate() || game.in_draw() || game.in_stalemate()) {
+      stopTimer();
+      
       if (game.in_checkmate()) {
-        if (playAs === "black") {
-          setGameResult(game.turn() === "w" ? "User wins!" : "StockFish wins!");
-        } else {
-          setGameResult(game.turn() === "w" ? "StockFish wins!" : "User wins!");
+        const isUserWin = (playAs === "black" && game.turn() === "w") || 
+                         (playAs === "white" && game.turn() === "b");
+        
+        const result = isUserWin ? "User wins!" : "StockFish wins!";
+        setGameResult(result);
+
+        // If user wins, save to leaderboard
+        if (isUserWin) {
+          const difficulty = stockfishLevel === 2 ? 'easy' : 
+                           stockfishLevel === 6 ? 'medium' : 'hard';
+          
+          fetch('/api/leaderboard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              difficulty,
+              playerName: userName,
+              timeSeconds: gameTimer
+            })
+          }).catch(error => {
+            console.error('Error saving score:', error);
+          });
         }
       } else {
         setGameResult("It's a draw!");
       }
+      
       setShowGameModal(true);
       setGameOver(true);
-    } else {
-      setGameResult("You Resigned!");
     }
 
     setMoves(game.history());
-  }, [game, playAs, setMoves, setGameResult, setGameOver]);
+  }, [game, playAs, setMoves, setGameResult, setGameOver, stopTimer, gameTimer, userName, stockfishLevel]);
 
   function getMoveOptions(square: Square) {
     const moves = game.moves({
@@ -162,6 +219,7 @@ const ChessboardBot: React.FC = () => {
 
   function onSquareClick(square: Square) {
     setRightClickedSquares({});
+    handleFirstMove();
 
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
@@ -250,10 +308,12 @@ const ChessboardBot: React.FC = () => {
   const onNewGame = useCallback(() => {
     game.reset();
     useBoardStore.setState({ moves: [] });
+    setHasGameStarted(false);
+    resetTimer();
     if (playAs === "black") {
       makeStockfishMove();
     }
-  }, [game, playAs, makeStockfishMove]);
+  }, [game, playAs, makeStockfishMove, resetTimer]);
 
   useEffect(() => {
     setOnNewGame(onNewGame);
@@ -290,7 +350,12 @@ const ChessboardBot: React.FC = () => {
   }, [game]);
 
   return (
-    <>
+    <div className="flex flex-col items-center gap-4">
+      {/* Timer Display */}
+      <div className="text-xl font-mono text-white">
+        {Math.floor(gameTimer / 60)}:{(gameTimer % 60).toString().padStart(2, '0')}
+      </div>
+
       <Chessboard
         animationDuration={300}
         arePiecesDraggable={false}
@@ -324,7 +389,7 @@ const ChessboardBot: React.FC = () => {
         gameResult={gameResult}
         onNewGame={onNewGame}
       />
-    </>
+    </div>
   );
 };
 

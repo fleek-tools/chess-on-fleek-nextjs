@@ -15,3 +15,5 @@ export {
   PlayAsButton,
   GameModal,
 };
+
+export { default as LeaderboardUI } from './LeaderboardUI';
